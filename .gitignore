@@ -1,0 +1,32 @@
+# dependencies — all subprojects
+**/node_modules
+
+# next.js
+**/.next/
+**/out/
+
+# typescript compiled output
+**/dist/
+**/*.tsbuildinfo
+
+# testing
+**/coverage
+
+# env files
+.env*
+
+# misc
+.DS_Store
+*.pem
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# vercel
+.vercel
+
+# next-env (auto-generated)
+**/next-env.d.ts
