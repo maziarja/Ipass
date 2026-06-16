@@ -45,28 +45,25 @@ A learning project: a password manager with a **Node.js/Express REST API** backe
 
 ```prisma
 model User {
-  id                String     @id @default(cuid())
-  email             String     @unique
-  passwordHash      String     // bcrypt hash of login password
-  masterSalt        String?    // PBKDF2 salt for key derivation
-  masterVerifyToken String?    // known plaintext encrypted with derived key
-  masterVerifyIv    String?    // IV used for masterVerifyToken
-  createdAt         DateTime   @default(now())
-  passwords         Password[]
+  id           String     @id @default(cuid())
+  email        String     @unique
+  password     String     // bcrypt hash of login password
+  masterSalt   String?    // PBKDF2 salt for key derivation (base64)
+  masterVerify String?    // iv + encrypted "ipass-verify" combined (base64)
+  createdAt    DateTime   @default(now())
+  passwords    Password[]
 }
 
 model Password {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  title      String
-  url        String?
-  category   String
-  ciphertext String   // AES-256-GCM encrypted password (base64)
-  iv         String   // initialization vector (base64)
-  authTag    String   // GCM auth tag (base64)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  url       String?
+  category  String
+  encrypted String   // iv + AES-GCM ciphertext combined (base64)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 ```
 
