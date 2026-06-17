@@ -24,7 +24,7 @@ async function register(req: Request, res: Response) {
 
   res.status(201).json({
     status: "success",
-    user: newUser,
+    data: newUser,
     jwt: token,
   });
 }
@@ -64,10 +64,10 @@ export const logout = (_req: Request, res: Response) => {
 };
 
 export const setupMaster = async (req: Request, res: Response) => {
-  if (req.user.masterSalt) throw new Error("You already set a master password");
+  if (req.user!.masterSalt) throw new Error("You already set a master password");
 
   await prisma.user.update({
-    where: { id: req.user.id },
+    where: { id: req.user!.id },
     data: {
       masterSalt: req.body.masterSalt,
       masterVerify: req.body.masterVerify,
@@ -77,6 +77,7 @@ export const setupMaster = async (req: Request, res: Response) => {
   res.status(200).json({
     status: "success",
     message: "Master password setup successfully!",
+    data: null,
   });
 };
 
