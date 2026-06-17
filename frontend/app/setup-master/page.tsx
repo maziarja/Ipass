@@ -28,41 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { setupMaster } from "@/lib/auth";
-
-// Key derivation using PBKDF2 — Phase 5 will move these to lib/crypto.ts
-async function deriveKey(
-  masterPassword: string,
-  salt: ArrayBuffer,
-): Promise<CryptoKey> {
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(masterPassword),
-    "PBKDF2",
-    false,
-    ["deriveKey"],
-  );
-  return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 200_000, hash: "SHA-256" },
-    keyMaterial,
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["encrypt", "decrypt"],
-  );
-}
-
-// AES-256-GCM encryption; IV is prepended to the ciphertext in the returned base64 string
-async function encrypt(plaintext: string, key: CryptoKey): Promise<string> {
-  const ivArray = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: ivArray.buffer as ArrayBuffer },
-    key,
-    new TextEncoder().encode(plaintext),
-  );
-  const blob = new Uint8Array(12 + encrypted.byteLength);
-  blob.set(ivArray, 0);
-  blob.set(new Uint8Array(encrypted), 12);
-  return btoa(String.fromCharCode(...blob));
-}
+import { deriveKey, encrypt } from "@/lib/crypto";
 
 export default function SetupMasterPage() {
   const router = useRouter();
@@ -90,6 +56,7 @@ export default function SetupMasterPage() {
       const masterSalt = btoa(String.fromCharCode(...saltArray));
 
       const result = await setupMaster(masterSalt, masterVerify);
+
       if (result?.status === "success") router.push("/vault");
     } catch (err) {
       form.setError("root", {
