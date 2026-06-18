@@ -1,12 +1,14 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
 import type { NextFunction, Request, Response } from "express";
 import userRoute from "./routes/userRoutes";
-import helmet from "helmet";
+import passwordRoute from "./routes/passwordRoutes";
 
 const app = express();
 
+// cors middleware
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
@@ -14,6 +16,7 @@ app.use(
   }),
 );
 
+// helmet middleware
 app.use(helmet());
 
 // cookie parser
@@ -22,12 +25,18 @@ app.use(cookieParser());
 // body parser
 app.use(express.json());
 
-app.use("/api/auth", userRoute);
-
+// check healthy
 app.get("/api/healthy", (_req: Request, res: Response) => {
   res.json({ ok: true });
 });
 
+// user route
+app.use("/api/auth", userRoute);
+
+// password route
+app.use("/api/passwords", passwordRoute);
+
+// error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (process.env.NODE_ENV === "development") {
     console.log(err);
