@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, Link } from 'lucide-react'
+import { Trash2, Pencil, Link } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,21 +12,23 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { DeleteDialog } from './DeleteDialog'
+import { EditPasswordDialog } from './EditPasswordDialog'
 import { deletePassword, type PasswordEntry } from '@/lib/passwords'
 
 type Props = {
   entry: PasswordEntry
   onDelete: (id: string) => void
+  onEdit: (updated: PasswordEntry) => void
 }
 
-export function PasswordCard({ entry, onDelete }: Props) {
-  const [dialogOpen, setDialogOpen] = useState(false)
+export function PasswordCard({ entry, onDelete, onEdit }: Props) {
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
 
   async function handleDelete() {
-    // TODO: call deletePassword(entry.id) when backend is ready
     await deletePassword(entry.id)
     onDelete(entry.id)
-    setDialogOpen(false)
+    setDeleteOpen(false)
   }
 
   return (
@@ -34,11 +36,19 @@ export function PasswordCard({ entry, onDelete }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>{entry.title}</CardTitle>
-          <CardAction>
+          <CardAction className="flex gap-1">
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={() => setDialogOpen(true)}
+              onClick={() => setEditOpen(true)}
+              aria-label={`Edit ${entry.title}`}
+            >
+              <Pencil />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setDeleteOpen(true)}
               aria-label={`Delete ${entry.title}`}
             >
               <Trash2 />
@@ -69,9 +79,16 @@ export function PasswordCard({ entry, onDelete }: Props) {
         </CardContent>
       </Card>
 
+      <EditPasswordDialog
+        entry={entry}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSuccess={onEdit}
+      />
+
       <DeleteDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
         title={entry.title}
       />

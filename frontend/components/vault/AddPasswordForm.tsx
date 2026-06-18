@@ -1,18 +1,20 @@
-'use client'
+"use client";
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 
 import {
   addPasswordSchema,
   type AddPasswordFormData,
   CATEGORIES,
-} from '@/lib/schemas/passwordSchemas'
-import { deriveKey, encrypt } from '@/lib/crypto'
-import { createPassword, type PasswordEntry } from '@/lib/passwords'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+} from "@/lib/schemas/passwordSchemas";
+import { encrypt } from "@/lib/crypto";
+import { createPassword, type PasswordEntry } from "@/lib/passwords";
+import { useVaultKey } from "@/lib/vaultKey";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Form,
   FormControl,
@@ -20,55 +22,50 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { PasswordStrengthMeter } from './PasswordStrengthMeter'
+} from "@/components/ui/form";
+import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
 
 type Props = {
-  masterSalt: string
-  onSuccess: (entry: PasswordEntry) => void
-}
+  onSuccess: (entry: PasswordEntry) => void;
+};
 
-export function AddPasswordForm({ masterSalt, onSuccess }: Props) {
+export function AddPasswordForm({ onSuccess }: Props) {
+  const { key } = useVaultKey();
+
   const form = useForm<AddPasswordFormData>({
     resolver: zodResolver(addPasswordSchema),
-    defaultValues: {
-      title: '',
-      url: '',
-      category: '',
-      password: '',
-      masterPassword: '',
-    },
-  })
+    defaultValues: { title: "", url: "", category: "", password: "" },
+  });
 
-  const watchedPassword = form.watch('password')
+  const watchedPassword = form.watch("password");
 
   async function onSubmit(data: AddPasswordFormData) {
+    if (!key) return;
     try {
-      const salt = Uint8Array.from(atob(masterSalt), (c) => c.charCodeAt(0))
-        .buffer as ArrayBuffer
-      const key = await deriveKey(data.masterPassword, salt)
-      const encrypted = await encrypt(data.password, key)
+      const encrypted = await encrypt(data.password, key);
 
-      // TODO: createPassword will POST to /api/passwords when backend is ready
       const entry = await createPassword({
         title: data.title,
         url: data.url || undefined,
         category: data.category,
         encrypted,
-      })
+      });
 
-      form.reset()
-      onSuccess(entry)
+      form.reset();
+      onSuccess(entry);
     } catch (err) {
-      form.setError('root', {
-        message: err instanceof Error ? err.message : 'Something went wrong',
-      })
+      form.setError("root", {
+        message: err instanceof Error ? err.message : "Something went wrong",
+      });
     }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="title"
@@ -89,7 +86,10 @@ export function AddPasswordForm({ masterSalt, onSuccess }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                URL <span className="font-normal text-muted-foreground">(optional)</span>
+                URL{" "}
+                <span className="font-normal text-muted-foreground">
+                  (optional)
+                </span>
               </FormLabel>
               <FormControl>
                 <Input
@@ -109,23 +109,21 @@ export function AddPasswordForm({ masterSalt, onSuccess }: Props) {
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Category</FormLabel>
-              <FormControl>
-                <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.map((cat) => (
-                    <Button
-                      key={cat}
-                      type="button"
-                      variant={field.value === cat ? 'default' : 'outline'}
-                      size="sm"
-                      className="rounded-full"
-                      onClick={() => field.onChange(cat)}
-                    >
-                      {cat}
-                    </Button>
-                  ))}
-                </div>
-              </FormControl>
+              <p className="text-sm leading-none font-medium">Category</p>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((cat) => (
+                  <Button
+                    key={cat}
+                    type="button"
+                    variant={field.value === cat ? "default" : "outline"}
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => field.onChange(cat)}
+                  >
+                    {cat}
+                  </Button>
+                ))}
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -138,7 +136,10 @@ export function AddPasswordForm({ masterSalt, onSuccess }: Props) {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" autoComplete="new-password" {...field} />
+                <PasswordInput
+                  autoComplete="new-password"
+                  {...field}
+                />
               </FormControl>
               <PasswordStrengthMeter password={watchedPassword} />
               <FormMessage />
@@ -146,34 +147,21 @@ export function AddPasswordForm({ masterSalt, onSuccess }: Props) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="masterPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Master password</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="Used to encrypt — never sent to the server"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {form.formState.errors.root && (
-          <p className="text-sm text-destructive">{form.formState.errors.root.message}</p>
+          <p className="text-sm text-destructive">
+            {form.formState.errors.root.message}
+          </p>
         )}
 
-        <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
+        <Button
+          type="submit"
+          disabled={form.formState.isSubmitting || !key}
+          className="w-full"
+        >
           {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
-          {form.formState.isSubmitting ? 'Saving…' : 'Save password'}
+          {form.formState.isSubmitting ? "Saving…" : "Save password"}
         </Button>
       </form>
     </Form>
-  )
+  );
 }

@@ -64,7 +64,8 @@ export const logout = (_req: Request, res: Response) => {
 };
 
 export const setupMaster = async (req: Request, res: Response) => {
-  if (req.user!.masterSalt) throw new Error("You already set a master password");
+  if (req.user!.masterSalt)
+    throw new Error("You already set a master password");
 
   await prisma.user.update({
     where: { id: req.user!.id },
@@ -91,6 +92,8 @@ export const getMe = async (req: Request, res: Response) => {
       id: user?.id,
       email: user?.email,
       hasMasterPassword,
+      masterSalt: user?.masterSalt,
+      masterVerify: user?.masterVerify,
     },
   });
 };

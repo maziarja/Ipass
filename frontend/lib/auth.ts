@@ -54,6 +54,20 @@ export const setupMaster = async (masterSalt: string, masterVerify: string) => {
   return parsed.data;
 };
 
+export const getMasterCredentials = async (): Promise<{
+  masterSalt: string;
+  masterVerify: string;
+}> => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to fetch user data");
+  const data = await res.json();
+  return { masterSalt: data.data.masterSalt, masterVerify: data.data.masterVerify };
+};
+
 export const login = async (email: string, password: string) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
     method: "POST",

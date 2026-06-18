@@ -10,7 +10,7 @@ import {
 } from "@/lib/schemas/authSchemas";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Card,
   CardContent,
@@ -89,8 +89,7 @@ export default function SetupMasterPage() {
                   <FormItem>
                     <FormLabel>Master password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         autoComplete="new-password"
                         {...field}
                       />
@@ -107,8 +106,7 @@ export default function SetupMasterPage() {
                   <FormItem>
                     <FormLabel>Confirm master password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         autoComplete="new-password"
                         {...field}
                       />

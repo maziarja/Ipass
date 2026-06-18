@@ -13,11 +13,10 @@ import { type PasswordEntry } from '@/lib/passwords'
 type Props = {
   open: boolean
   onOpenChange: (v: boolean) => void
-  masterSalt: string
   onSuccess: (entry: PasswordEntry) => void
 }
 
-export function AddPasswordDialog({ open, onOpenChange, masterSalt, onSuccess }: Props) {
+export function AddPasswordDialog({ open, onOpenChange, onSuccess }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -28,7 +27,6 @@ export function AddPasswordDialog({ open, onOpenChange, masterSalt, onSuccess }:
           </DialogDescription>
         </DialogHeader>
         <AddPasswordForm
-          masterSalt={masterSalt}
           onSuccess={(entry) => {
             onOpenChange(false)
             onSuccess(entry)
