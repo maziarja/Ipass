@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, Pencil, Link } from 'lucide-react'
+import { Trash2, Pencil, Link, Eye, Copy } from 'lucide-react'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,7 +14,10 @@ import {
 } from '@/components/ui/card'
 import { DeleteDialog } from './DeleteDialog'
 import { EditPasswordDialog } from './EditPasswordDialog'
+import { RevealModal } from './RevealModal'
 import { deletePassword, type PasswordEntry } from '@/lib/passwords'
+import { decrypt } from '@/lib/crypto'
+import { useVaultKey } from '@/lib/vaultKey'
 
 type Props = {
   entry: PasswordEntry
@@ -22,13 +26,26 @@ type Props = {
 }
 
 export function PasswordCard({ entry, onDelete, onEdit }: Props) {
+  const { key } = useVaultKey()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
+  const [revealOpen, setRevealOpen] = useState(false)
 
   async function handleDelete() {
     await deletePassword(entry.id)
     onDelete(entry.id)
     setDeleteOpen(false)
+  }
+
+  async function handleCopy() {
+    if (!key) return
+    try {
+      const plaintext = await decrypt(entry.encrypted, key)
+      await navigator.clipboard.writeText(plaintext)
+      toast.success('Copied to clipboard')
+    } catch {
+      toast.error('Failed to copy password')
+    }
   }
 
   return (
@@ -37,6 +54,22 @@ export function PasswordCard({ entry, onDelete, onEdit }: Props) {
         <CardHeader>
           <CardTitle>{entry.title}</CardTitle>
           <CardAction className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setRevealOpen(true)}
+              aria-label={`Reveal ${entry.title}`}
+            >
+              <Eye />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleCopy}
+              aria-label={`Copy ${entry.title}`}
+            >
+              <Copy />
+            </Button>
             <Button
               variant="ghost"
               size="icon-sm"
@@ -78,6 +111,12 @@ export function PasswordCard({ entry, onDelete, onEdit }: Props) {
           </p>
         </CardContent>
       </Card>
+
+      <RevealModal
+        entry={entry}
+        open={revealOpen}
+        onOpenChange={setRevealOpen}
+      />
 
       <EditPasswordDialog
         entry={entry}

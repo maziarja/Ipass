@@ -1,13 +1,16 @@
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { z } from "zod";
 
-export type PasswordEntry = {
-  id: string;
-  title: string;
-  url?: string | null;
-  category: string;
-  encrypted: string;
-  createdAt: string;
-};
+const passwordEntrySchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  url: z.string().nullable().optional(),
+  category: z.string(),
+  encrypted: z.string(),
+  createdAt: z.string(),
+});
+
+export type PasswordEntry = z.infer<typeof passwordEntrySchema>;
 
 export async function listPasswords(
   cookie: ReadonlyRequestCookies,
@@ -22,7 +25,7 @@ export async function listPasswords(
   if (!res.ok) throw new Error("Unable to fetch passwords");
   const data = await res.json();
 
-  return data.data;
+  return z.array(passwordEntrySchema).parse(data.data);
 }
 
 export async function createPassword(payload: {
@@ -43,7 +46,7 @@ export async function createPassword(payload: {
     throw new Error(err.message ?? "Failed to save password");
   }
   const data = await res.json();
-  return data.data;
+  return passwordEntrySchema.parse(data.data);
 }
 
 export async function updatePassword(
@@ -65,7 +68,7 @@ export async function updatePassword(
     throw new Error(err.message ?? "Failed to update password");
   }
   const data = await res.json();
-  return data.data;
+  return passwordEntrySchema.parse(data.data);
 }
 
 export async function deletePassword(id: string): Promise<void> {
