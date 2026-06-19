@@ -144,6 +144,53 @@ Goal: production-ready feel, good empty/error/loading states.
 
 ---
 
+## Phase 10 — Landing Page & Auth Navigation
+
+Goal: public-facing landing page at `/` and consistent navigation on auth pages.
+
+| #    | Task                                                                                                                  | Owner  |
+| ---- | --------------------------------------------------------------------------------------------------------------------- | ------ |
+| 10.1 | Landing page at `/` — Hero section with tagline, CTA buttons ("Sign in" / "Get started")                             | `[CC]` |
+| 10.2 | Features section — 3–4 cards (zero-knowledge encryption, AES-256-GCM, master password, cross-device access)          | `[CC]` |
+| 10.3 | "How it works" section — 3-step flow: Register → Set master password → Save & reveal passwords                       | `[CC]` |
+| 10.4 | Footer — app name, year                                                                                               | `[CC]` |
+| 10.5 | Shared `AuthHeader` component — shows "iPass" logo/wordmark + "Back to home" link; used on `/login` and `/register`  | `[CC]` |
+| 10.6 | Add `AuthHeader` to `/login` and `/register` pages                                                                    | `[CC]` |
+
+---
+
+## Phase 11 — Deployment
+
+Goal: ship the app to production.
+
+### Frontend — Vercel
+
+| #    | Task                                                                                                              | Owner    |
+| ---- | ----------------------------------------------------------------------------------------------------------------- | -------- |
+| 11.1 | Push repo to GitHub (if not already there)                                                                        | `[YOU]`  |
+| 11.2 | Import project on vercel.com → set root directory to `frontend/`                                                  | `[YOU]`  |
+| 11.3 | Add env var in Vercel dashboard: `NEXT_PUBLIC_API_URL=<Railway backend URL>`                                      | `[YOU]`  |
+| 11.4 | Update Next.js `proxy.ts` (or `middleware.ts`) to allow the Vercel production domain as a trusted origin          | `[CC]`   |
+| 11.5 | Deploy and verify: landing page loads, login works, vault fetches passwords                                       | `[YOU]`  |
+
+### Backend — Railway
+
+| #    | Task                                                                                                              | Owner    |
+| ---- | ----------------------------------------------------------------------------------------------------------------- | -------- |
+| 11.6 | Create new project on railway.app → "Deploy from GitHub repo" → select `backend/` as root                        | `[YOU]`  |
+| 11.7 | Add env vars in Railway dashboard: `DATABASE_URL`, `JWT_SECRET`, `PORT=5001`, `NODE_ENV=production`               | `[YOU]`  |
+| 11.8 | Add `CORS_ORIGIN=<Vercel frontend URL>` env var; update Express CORS config to read from it                       | `[YOU]`  |
+| 11.9 | Add a `start` script in `backend/package.json`: `"start": "node dist/index.js"`; ensure `build` compiles TS      | `[YOU]`  |
+| 11.10| Verify: `GET <railway-url>/api/health` returns `{ ok: true }`                                                     | `[YOU]`  |
+
+### Cookie / CORS notes for production
+
+- Express cookie must set `secure: true` and `sameSite: 'none'` when frontend and backend are on different domains (Vercel ≠ Railway).
+- Update `backend/src/index.ts` CORS to `origin: process.env.CORS_ORIGIN, credentials: true`.
+- Update cookie options: `secure: process.env.NODE_ENV === 'production'`, `sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'`.
+
+---
+
 ## Build order summary
 
 ```
@@ -160,6 +207,10 @@ Phase 1 (Setup)
                              Phase 8 (Reveal & Copy)
                                     │
                              Phase 9 (Polish)
+                                    │
+                             Phase 10 (Landing Page)
+                                    │
+                             Phase 11 (Deployment)
 ```
 
 Start Phase 4 and Phase 2–3 in parallel — frontend auth UI and backend auth API are independent until Phase 6.

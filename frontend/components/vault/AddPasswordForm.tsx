@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   addPasswordSchema,
@@ -53,6 +54,7 @@ export function AddPasswordForm({ onSuccess }: Props) {
 
       form.reset();
       onSuccess(entry);
+      toast.success("Password saved");
     } catch (err) {
       form.setError("root", {
         message: err instanceof Error ? err.message : "Something went wrong",

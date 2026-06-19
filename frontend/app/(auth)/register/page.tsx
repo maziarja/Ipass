@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { register } from "@/lib/auth";
+import { AuthHeader } from "@/components/layout/AuthHeader";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -50,7 +51,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen flex-col">
+      <AuthHeader />
+      <div className="flex flex-1 items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Create account</CardTitle>
@@ -147,6 +150,7 @@ export default function RegisterPage() {
           </Link>
         </CardFooter>
       </Card>
+      </div>
     </div>
   );
 }
