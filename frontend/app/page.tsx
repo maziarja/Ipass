@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ShieldCheck, Lock, KeyRound } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import {
   Card,
   CardContent,
@@ -59,6 +60,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <span className="font-semibold">iPass</span>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link
               href="/login"
               className={buttonVariants({ variant: 'ghost', size: 'sm' })}
