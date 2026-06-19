@@ -2,15 +2,12 @@ import z from "zod";
 import { createResponseSchema, userDataSchema } from "./schemas/responseSchema";
 
 export const register = async (email: string, password: string) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    },
-  );
+  const res = await fetch("/api/auth/register", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
 
   if (!res.ok) {
     const error = await res.json();
@@ -28,15 +25,12 @@ export const register = async (email: string, password: string) => {
 };
 
 export const setupMaster = async (masterSalt: string, masterVerify: string) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/setup-master`,
-    {
-      method: "PATCH",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ masterSalt, masterVerify }),
-    },
-  );
+  const res = await fetch("/api/auth/setup-master", {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ masterSalt, masterVerify }),
+  });
 
   if (!res.ok) {
     const error = await res.json();
@@ -58,7 +52,7 @@ export const getMasterCredentials = async (): Promise<{
   masterSalt: string;
   masterVerify: string;
 }> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+  const res = await fetch("/api/auth/me", {
     method: "GET",
     credentials: "include",
     cache: "no-store",
@@ -69,7 +63,7 @@ export const getMasterCredentials = async (): Promise<{
 };
 
 export const login = async (email: string, password: string) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+  const res = await fetch("/api/auth/login", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -92,7 +86,7 @@ export const login = async (email: string, password: string) => {
 };
 
 export const logout = async (): Promise<void> => {
-  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+  await fetch("/api/auth/logout", {
     method: "POST",
     credentials: "include",
   });
